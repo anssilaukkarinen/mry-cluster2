@@ -4,6 +4,10 @@
 
 # ...except these files:
 
+!read_delphin_data.py
+!make_basic_plots.py
+!mry_helper.py
 !mrycluster2.py
+
 !LICENCE
 !README.md
