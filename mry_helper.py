@@ -21,6 +21,41 @@ import scipy.stats as ss
 
 
 
+
+
+replacements = {'USP': 'PRP',
+                 'UST': 'PRT',
+                 'BSWE': 'BSW',
+                 'PICB': 'EHR',
+                 'TRC': 'BSR',
+                 'SW': 'PVP',
+                 'USH': 'USH',
+                 'YP': 'YP'}
+
+
+def get_new_names(old_names):
+    
+    new_names = []
+    for old_name in old_names:
+        items_list = old_name.split('_')
+        
+        first = items_list[0]
+        if 'north' in first:
+            first = first[0:-5]
+        elif 'south' in first:
+            first = first[0:-5]
+        else:
+            print(first)
+        
+        str_dummy = '{}, {}, {}'.format(replacements[first],
+                                      int(items_list[-2].replace('df','')) + 1,
+                                      items_list[-1])
+        new_names.append(str_dummy)
+    
+    return(new_names)
+
+
+
 #############################################
 
 def create_X(data, case_filters, y_yes_filters, y_not_filters):

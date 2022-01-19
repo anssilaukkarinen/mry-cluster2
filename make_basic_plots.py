@@ -29,7 +29,7 @@ output_folder = r'C:\Local\laukkara\Data\github\mry-cluster2\output\basic_plots'
 
 labels_for_median = ['1989-2018', 'RCP45-2050','RCP45-2080','RCP85-2050','RCP85-2080']
 
-dpi_val = 70
+dpi_val = 200
 
 locs = ['Sod', 'Jyv', 'Jok', 'Van']
 loc_full_name = ['Sodankylä', 'Jyväskylä', 'Jokioinen', 'Vantaa']
@@ -270,20 +270,51 @@ for idx, loc in enumerate(locs):
     fname = os.path.join(output_folder_medians,
                          'median_of_medians_{}_{}.png'.format(loc, values_key))
     fig.savefig(fname, dpi=dpi_val, bbox_inches='tight')
+    plt.close(fig)
     
     
     # Plot, boxplots
+    flierprops = {'marker': 'o',
+                  'markersize': 0.6}
     print('medians_df.shape:', medians_df.shape)
     fig, ax = plt.subplots()
-    medians_df.loc[medians_df['location']==loc, columns_list].boxplot(rot=90,
-                                                        ax=ax)
+    medians_df.loc[medians_df['location']==loc, columns_list].boxplot(ax=ax,
+                                                                      rot=90,
+                                                                      notch=True,
+                                                                      flierprops=flierprops)
     _ = ax.set_xticklabels(range(1989, 2019))
     fig.suptitle(loc_full_name[idx])
     ax.set_ylabel('Mediaanien jakauma')
+    #ax.grid(b=True, axis='y')
+    ax.xaxis.grid(False)
+    ax.yaxis.grid(True)
     fname = os.path.join(output_folder_medians,
                          'boxplot_{}_{}.png'.format(loc, values_key))
     fig.savefig(fname, dpi=dpi_val, bbox_inches='tight')
-
+    plt.close(fig)
+    
+    
+    # Plot, pointplots, the ci is for the estimated value, not the whole dataset
+    print('medians_df.shape:', medians_df.shape)   
+    fig, ax = plt.subplots()
+    sns.pointplot(data=medians_df.loc[medians_df['location']==loc, columns_list],
+                  ci=95,
+                  join=False,
+                  scale=0.5,
+                  errwidth=0.7,
+                  ax=ax)
+    ax.set_xticklabels([str(x) for x in np.arange(1989, 2019)], rotation=90)
+    fig.suptitle(loc_full_name[idx])
+    ax.set_ylabel('Mediaanien jakauma')
+    if 'M_' in values_key:
+        ax.set_ylim( (0, 6) )
+    elif '_RH_' in values_key:
+        ax.set_ylim( (50, 100) )
+    ax.grid(b=True, axis='y') # lines become unclear, if grid is included
+    fname = os.path.join(output_folder_medians,
+                         'pointplot_of_mean_{}_{}.png'.format(loc, values_key))
+    fig.savefig(fname, dpi=dpi_val, bbox_inches='tight')
+    plt.close(fig)
 
 
 
@@ -333,7 +364,15 @@ comps = [{'headers': ['BSWE_EPS100S220_asol25_expco224_north',
         {'headers': ['USP_GB_MW250_asol25_expco169_north_wood626',
                      'USP_GB_MW250_asol25_expco169_north_wood713'],
          'varnames': ['M_stud_e_up_max',
-                      'M_stud_e_up_max']}]
+                      'M_stud_e_up_max']},
+        {'headers': ['USP_GB_MW250_asol25_expco169_north_wood626',
+                     'USP_GB_MW250_asol25_expco169_south_wood626'],
+         'varnames': ['M_stud_e_dn_max',
+                      'M_stud_e_dn_max']},
+        {'headers': ['USP_GB_MW250_asol25_expco169_north_wood626',
+                     'USP_GB_MW250_asol25_expco169_south_wood626'],
+         'varnames': ['M_stud_e_dn_max_rank',
+                      'M_stud_e_dn_max_rank']}]
 
 # Tähän ylle voi lisätä muita pareja vertailuun...
 
