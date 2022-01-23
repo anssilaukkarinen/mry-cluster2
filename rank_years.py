@@ -147,8 +147,8 @@ for ML_folder in ML_folders:
                     print('other ylabel!')
                 
                 fname = os.path.join(output_folder,
-                                     '{} {} {} {} {}'.format('north',
-                                                             ML_folder,
+                                      '{} {} {} {} {}'.format('north',
+                                                              ML_folder,
                                                               n_clusters_max,
                                                               y_yes,
                                                               location))
@@ -191,7 +191,50 @@ for ML_folder in ML_folders:
                     print('other ylabel!')
                 
                 fname = os.path.join(output_folder,
-                                     '{} {} {} {} {}'.format('south',
+                                      '{} {} {} {} {}'.format('south',
+                                                              ML_folder,
+                                                              n_clusters_max,
+                                                              y_yes,
+                                                              location))
+                fig.savefig(fname, dpi=dpi_val, bbox_inches='tight')
+                plt.close(fig)
+                
+    
+                ## YP
+                rows_rank_YP = [x for x in df.index if '___rank' in x and 'YP' in x]
+                rows_values_YP = [x for x in df.index if '___rank' not in x and 'YP' in x]
+                
+                df_YP_ranks = df.loc[df.index.isin(rows_rank_YP)].copy()
+                df_YP_values = df.loc[df.index.isin(rows_values_YP)].copy()
+                
+                df_YP_ranks.loc['median_rank'] = df_YP_ranks.median(axis=0)
+                
+                df_YP_ranks.sort_values(by='median_rank', axis=1, inplace=True)
+                
+                df_YP_values = df_YP_values.reindex(columns=df_YP_ranks.columns[::-1]).copy()
+                
+                # plot
+                x_labels = mry_helper.get_new_names(df_YP_values.index)
+                
+                fig, ax = plt.subplots(figsize=(5.5, 3.5))
+                df_YP_values.iloc[:, 0:5].plot(ax=ax,
+                                                  grid=True,
+                                                  style='.-')
+                ax.set_xticks(range(0, len(df_YP_values.index)))
+                ax.set_xticklabels(x_labels, rotation=90)
+                if y_yes == '_M_':
+                    ax.set_ylabel('M, -')
+                    ax.set_ylim( (0,6) )
+                elif y_yes == '_RH_':
+                    ax.set_ylabel('RH, %')
+                    ax.set_ylim( (50, 100) )
+                elif y_yes == '_moverhygr_':
+                    ax.set_ylabel('$\Delta m$, kg/m$^2$')
+                else:
+                    print('other ylabel!')
+                
+                fname = os.path.join(output_folder,
+                                     '{} {} {} {} {}'.format('YP',
                                                              ML_folder,
                                                               n_clusters_max,
                                                               y_yes,
@@ -200,7 +243,6 @@ for ML_folder in ML_folders:
                 plt.close(fig)
                 
     
-
 
 
 

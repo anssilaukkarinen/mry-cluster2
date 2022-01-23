@@ -30,7 +30,8 @@ replacements = {'USP': 'PRP',
                  'TRC': 'BSR',
                  'SW': 'PVP',
                  'USH': 'USH',
-                 'YP': 'YP'}
+                 'YP1': 'YP',
+                 'YP3': 'YP'}
 
 
 def get_new_names(old_names):

@@ -38,7 +38,14 @@ fname = os.path.join(input_folder,
 with open(fname, 'rb') as f:
     data = pickle.load(f)
 
+# remove wood 626 from data
+data_new = {}
 
+for key in data:
+    if '626' not in key:
+        data_new[key] = data[key]
+
+data = data_new
 
 
 
@@ -60,16 +67,16 @@ print(starts_unique)
 
 
 # M
-# y_yes_filters = ['M_']
-# y_not_filters = ['rank']
+y_yes_filters = ['M_']
+y_not_filters = ['rank']
 
 # moverhygr
 # y_yes_filters = ['moverhygr_']
 # y_not_filters = ['rank']
 
 # RH
-y_yes_filters = ['RH_']
-y_not_filters = ['rank', 'TRH']
+# y_yes_filters = ['RH_']
+# y_not_filters = ['rank', 'TRH']
 
 
 
