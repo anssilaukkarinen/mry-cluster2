@@ -33,6 +33,7 @@ data = {}
 cases = os.listdir(input_folder_for_Delphin_data)
 cases.remove('olds')
 cases.remove('RAMI_simulated_cases.xlsx')
+cases.remove('d_ins_i')
 
 data = {}
 for case in cases:

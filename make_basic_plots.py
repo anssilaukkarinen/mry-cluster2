@@ -44,14 +44,31 @@ if __name__ == '__main__':
     with open(input_pickle_file_path, 'rb') as f:
         data = pickle.load(f)
     
+    
+    
     # remove wood 626 from data
     data_new = {}
     
     for key in data:
-        if '626' not in key:
+        if '626' in key:
+            pass
+        
+        elif 'UST_' in key:
+            # remove interior data points from UST
+            
+            cols_to_include = [x for x in data[key].columns if 'stud_i' not in x and 'ins_i' not in x]
+            
+            data_new[key] = data[key].loc[:, cols_to_include]
+            
+        else:
             data_new[key] = data[key]
     
     data = data_new
+    
+    
+    
+    
+    
     
     
     ################################
@@ -120,16 +137,17 @@ if __name__ == '__main__':
     
     # Scatter plots for indicator vs indicator
     
-    # Original format, where the function was inside the for loop
+    # Original format, where the function was inside the for loop:
     # for idx_case, case in enumerate(data):
     #     func_parallel_scatter_plots(data, idx_case, case, output_folder)
     
-    # # Using multiprocessing
-    # with multiprocessing.Pool(processes=7) as a_pool:
-    #     a_pool.starmap(mry_helper.func_parallel_scatter_plots,
-    #                    zip(itertools.repeat(data), 
-    #                        data.keys(),
-    #                        itertools.repeat(output_folder)))
+    # Using multiprocessing, i.e. new version:
+    # [x for x in data.keys() if 'YP' in x]
+    with multiprocessing.Pool(processes=7) as a_pool:
+        a_pool.starmap(mry_helper.func_parallel_scatter_plots,
+                        zip(itertools.repeat(data), 
+                            data.keys(),
+                            itertools.repeat(output_folder)))
     
     
     
@@ -141,16 +159,17 @@ if __name__ == '__main__':
     
     ###############################
     
-    # 30a time series and 10 pieces of boxplots
+    # 30a time series and 10 pieces of boxplots, old version:
     # for idx_case, case in enumerate(data):
     #     mry_helper.func_parallel_30year_plots(data, case, output_folder)
         
-    
-    # with multiprocessing.Pool(processes=7) as a_pool:
-    #     a_pool.starmap(mry_helper.func_parallel_30year_plots,
-    #                    zip(itertools.repeat(data), 
-    #                        data.keys(),
-    #                        itertools.repeat(output_folder)))
+    # new version:
+    # [x for x in data.keys() if 'YP' in x]
+    with multiprocessing.Pool(processes=7) as a_pool:
+        a_pool.starmap(mry_helper.func_parallel_30year_plots,
+                        zip(itertools.repeat(data), 
+                            data.keys(),
+                            itertools.repeat(output_folder)))
     
     
     
@@ -400,15 +419,30 @@ if __name__ == '__main__':
         plt.close(fig)
         
         
-        # scatter plot
+        # scatter plot, this is not needed anymore, but still kept
+        x1_dummy = x1_str.replace('__','\n')
+        if 'M_' in x1_dummy:
+            x1_label = 'M, -'
+        else:
+            x1_label = x1_dummy
+            
+        x2_dummy = x2_str.replace('__','\n')
+        if 'M_' in x2_dummy:
+            x2_label = 'M, -'
+        else:
+            x2_label = x2_dummy
+            
+        
         ax = df.plot.scatter(x=x1_str,
                              y=x2_str)
-        ax.set_xlabel(x1_str.replace('__','\n'))
-        ax.set_ylabel(x2_str.replace('__','\n'))
+        ax.set_xlabel(x1_label)
+        ax.set_ylabel(x2_label)
         fig = ax.get_figure()
         ax.set_title('Corr: {:.2f}'.format(df.corr().iloc[0, -1]))
         fname = os.path.join(output_folder_comparisons,
-                             str(idx) + '_corr.png')
+                             '{} {} {}_corr.png'.format(str(idx),
+                                                  x1_str,
+                                                  x2_str))
         fig.savefig(fname, dpi=dpi_val, bbox_inches='tight')
         plt.close(fig)
     

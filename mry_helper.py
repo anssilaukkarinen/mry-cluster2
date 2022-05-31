@@ -46,7 +46,8 @@ def get_new_names(old_names):
         elif 'south' in first:
             first = first[0:-5]
         else:
-            print(first)
+            pass
+            #print(first)
         
         str_dummy = '{}, {}, {}'.format(replacements[first],
                                       int(items_list[-2].replace('df','')) + 1,
@@ -283,6 +284,17 @@ def func_parallel_scatter_plots(data, case, output_folder):
     print('Scatter plots:', case)
     
     rank_names = [x for x in data[case].columns if 'rank' in x]
+    
+    # This is added afterwards, because not all simulations contained
+    # corresponding non-rank-value
+    rank_names_copy = []
+    for rank_name in rank_names:
+        if rank_name[:-5] in data[case].columns:
+            rank_names_copy.append(rank_name)
+    rank_names = rank_names_copy.copy()
+    
+    
+    
     print('case, len(rank_names)', case, len(rank_names))
     
     for idx1, val1 in enumerate(rank_names):
@@ -297,6 +309,26 @@ def func_parallel_scatter_plots(data, case, output_folder):
                 os.makedirs(figures_folder)
             
             
+            # axis labels
+            if 'M_' in rank_names[idx1]:
+                idx1_label = 'M, -'
+            elif 'moverhygr_' in rank_names[idx1]:
+                idx1_label = '$\Delta w_{95}$, kg/m$^3$'
+            elif 'RH_' in rank_names[idx1] and 'TRH_' not in rank_names[idx1]:
+                idx1_label = 'RH, %'
+            else:
+                idx1_label = rank_names[idx1]
+            
+            if 'M_' in rank_names[idx2]:
+                idx2_label = 'M, -'
+            elif 'moverhygr_' in rank_names[idx2]:
+                idx2_label = '$\Delta w_{95}$, kg/m$^3$'
+            elif 'RH_' in rank_names[idx2] and 'TRH_' not in rank_names[idx2]:
+                idx2_label = 'RH, %'
+            else:
+                idx2_label = rank_names[idx2]
+            
+            
             # rank against rank, all points at one go
             x1 = data[case].loc[:, rank_names[idx1]].values
             x2 = data[case].loc[:, rank_names[idx2]].values
@@ -304,8 +336,8 @@ def func_parallel_scatter_plots(data, case, output_folder):
             fig, ax = plt.subplots(figsize=(6,4))
             ax.plot(x1, x2, '.')
             ax.grid()
-            ax.set_xlabel(rank_names[idx1])
-            ax.set_ylabel(rank_names[idx2])
+            ax.set_xlabel(idx1_label)
+            ax.set_ylabel(idx2_label)
             fname = os.path.join(figures_folder, \
                                 rank_names[idx1] + '_' \
                                 + rank_names[idx2] + '_all.png')
@@ -323,8 +355,8 @@ def func_parallel_scatter_plots(data, case, output_folder):
                 ax.scatter(x1[idxs], x2[idxs],
                          marker=markers[idx], s=s_val)
             ax.grid()
-            ax.set_xlabel(rank_names[idx1])
-            ax.set_ylabel(rank_names[idx2])
+            ax.set_xlabel(idx1_label)
+            ax.set_ylabel(idx2_label)
             ax.legend(u_loc, bbox_to_anchor=(1.0, 0.5), loc='center left')
             fname = os.path.join(figures_folder, \
                                 rank_names[idx1] + '_' \
@@ -343,8 +375,8 @@ def func_parallel_scatter_plots(data, case, output_folder):
             fig, ax = plt.subplots(figsize=(6,4))
             ax.plot(x1, x2, '.')
             ax.grid()
-            ax.set_xlabel(x1_name)
-            ax.set_ylabel(x2_name)
+            ax.set_xlabel(idx1_label)
+            ax.set_ylabel(idx2_label)
             fname = os.path.join(figures_folder, \
                                 x1_name + '_' \
                                 + x2_name + '_all.png')
@@ -363,8 +395,8 @@ def func_parallel_scatter_plots(data, case, output_folder):
                             marker=markers[idx], s=s_val)
             ax.grid()
             ax.set_axisbelow(True)
-            ax.set_xlabel(x1_name)
-            ax.set_ylabel(x2_name)
+            ax.set_xlabel(idx1_label)
+            ax.set_ylabel(idx2_label)
             ax.legend(u_loc, bbox_to_anchor=(1.0, 0.5), loc='center left')
             fname = os.path.join(figures_folder, \
                                 x1_name + '_' \
@@ -386,9 +418,23 @@ def func_parallel_30year_plots(data, case, output_folder):
     dpi_val = 100
     labels_for_median = ['1989-2018', 'RCP45-2050','RCP45-2080','RCP85-2050','RCP85-2080']
     
+    converter = {'Jok': 'Jokioinen',
+                 'Jyv': 'Jyväskylä',
+                 'Sod': 'Sodankylä',
+                 'Van': 'Vantaa'}
+    
     # plot folder
     print('30 year plots:', case)
     rank_names = [x for x in data[case].columns if 'rank' in x]
+    
+    # This is added afterwards, because not all simulations contained
+    # corresponding non-rank-value
+    rank_names_copy = []
+    for rank_name in rank_names:
+        if rank_name[:-5] in data[case].columns:
+            rank_names_copy.append(rank_name)
+    rank_names = rank_names_copy.copy()
+    
     
     figures_folder_30a = os.path.join(output_folder, 'figures_30a', case)
     if not os.path.exists(figures_folder_30a):
@@ -404,8 +450,19 @@ def func_parallel_30year_plots(data, case, output_folder):
             
             idxs = data[case].loc[:, 'location'] == location
             
-            y_name = rank_name.replace('_rank', '')
-            y = data[case].loc[ idxs , y_name].values.reshape((30, -1), order='F')
+            y_name_dummy = rank_name.replace('_rank', '')
+            
+            if 'M_' in rank_name:
+                y_name = 'M, -'
+            elif 'moverhygr' in rank_name:
+                y_name = '$\Delta w_{95}$, kg/m$^3$'
+            elif 'RH_' in rank_name and 'TRH_' not in rank_name:
+                y_name = 'RH, %'
+            else:
+                y_name = y_name_dummy
+            
+            
+            y = data[case].loc[ idxs , y_name_dummy].values.reshape((30, -1), order='F')
             x = data[case].loc[ idxs, 'year'].values[0:30].reshape(-1) # reshape((30, 1))
             climates = data[case].loc[idxs, 'climate'].unique()
             
@@ -425,10 +482,10 @@ def func_parallel_30year_plots(data, case, output_folder):
             ax.grid()
             ax.set_xlabel('Vuosi')
             ax.set_ylabel(y_name)
-            ax.set_title(location)
+            ax.set_title(converter[location])
             ax.legend(climates[::-1], bbox_to_anchor=(1.0, 0.5), loc='center left')
             fname = os.path.join(figures_folder_30a,
-                                 y_name + '_' \
+                                 y_name_dummy + '_' \
                                  + location + '_linegraph.png')
             fig.savefig(fname, dpi=dpi_val, bbox_inches='tight')
             plt.close(fig)
@@ -442,9 +499,9 @@ def func_parallel_30year_plots(data, case, output_folder):
                 ax.set_ylim((0, 6))
             fig.autofmt_xdate()
             ax.set_ylabel(y_name)
-            ax.set_title(location)
+            ax.set_title(converter[location])
             fname = os.path.join(figures_folder_30a,
-                                 y_name + '_' \
+                                 y_name_dummy + '_' \
                                  + location + '_boxplot_abs.png')
             fig.savefig(fname, dpi=dpi_val, bbox_inches='tight')
             plt.close(fig)
@@ -459,10 +516,10 @@ def func_parallel_30year_plots(data, case, output_folder):
             _ = plt.boxplot(d_ydf, labels=climates)
             ax.grid()
             fig.autofmt_xdate()
-            ax.set_ylabel('$\Delta R$ suureelle ' + rank_name + ', 30 a')
-            ax.set_title(location)
+            ax.set_ylabel('$\Delta R$')
+            ax.set_title(converter[location])
             fname = os.path.join(figures_folder_30a,
-                                  y_name + '_' \
+                                  y_name_dummy + '_' \
                                   + location + '_boxplot_dev.png')
             fig.savefig(fname, dpi=dpi_val, bbox_inches='tight')
             plt.close(fig)

@@ -25,12 +25,12 @@ locations = ['Jok', 'Van', 'Jyv', 'Sod']
 
 
 ##
-ML_folders = ['agglomerative_euclidean_average',
-              'agglomerative_euclidean_ward',
-              'agglomerative_manhattan_average',
-              'kmeans']
-y_yess = ['_M_', '_RH_', '_moverhygr_']
-n_clusters_maxs = [1, 2, 3, 4]
+# ML_folders = ['agglomerative_euclidean_average',
+#               'agglomerative_euclidean_ward',
+#               'agglomerative_manhattan_average',
+#               'kmeans']
+# y_yess = ['_M_', '_RH_', '_moverhygr_']
+# n_clusters_maxs = [1, 2, 3, 4]
 
 
 ##
@@ -44,10 +44,22 @@ n_clusters_maxs = [1, 2, 3, 4]
 # n_clusters_maxs = [3]
 
 
+ML_folders = ['agglomerative_euclidean_average',
+              'agglomerative_euclidean_ward',
+              'agglomerative_manhattan_average',
+              'kmeans']
+
+ML_folder_replacements = {'agglomerative_euclidean_average': 'Agg-EA',
+                          'agglomerative_euclidean_ward': 'Agg-EW',
+                          'agglomerative_manhattan_average': 'Agg-MA',
+                          'kmeans': 'KMeans'}
+
+y_yess = ['_M_', '_moverhygr_']
+n_clusters_maxs = [3]
 
 
 
-dpi_val = 200
+dpi_val = 300
 
 ##################
 output_folder = os.path.join(root_dir,
@@ -74,7 +86,7 @@ for ML_folder in ML_folders:
         groupers[ML_folder][y_yes] = {}
 
         for n_clusters_max in n_clusters_maxs:
-            print(' ', n_clusters_max)
+            print('    ', n_clusters_max)
 
             data, grouper = mry_helper.func_rank_years(root_dir,
                                                        ML_folder,
@@ -90,6 +102,9 @@ for ML_folder in ML_folders:
 
 
 ## read combined_location, export to step1
+
+to_csv = []
+
 
 for ML_folder in ML_folders:
     
@@ -138,11 +153,14 @@ for ML_folder in ML_folders:
                 if y_yes == '_M_':
                     ax.set_ylabel('M, -')
                     ax.set_ylim( (0,6) )
+                    csv_key = 'M'
                 elif y_yes == '_RH_':
                     ax.set_ylabel('RH, %')
                     ax.set_ylim( (50, 100) )
+                    csv_key = 'RH'
                 elif y_yes == '_moverhygr_':
                     ax.set_ylabel('$\Delta m$, kg/m$^2$')
+                    csv_key = 'dm'
                 else:
                     print('other ylabel!')
                 
@@ -154,6 +172,21 @@ for ML_folder in ML_folders:
                                                               location))
                 fig.savefig(fname, dpi=dpi_val, bbox_inches='tight')
                 plt.close(fig)
+                
+                
+                dummy = {'Paikkakunta': location,
+                         'Ilmansuunta': 'P',
+                         'Arviointisuure': csv_key,
+                         'n_clusters_max': n_clusters_max,
+                         'Ryhmittely': ML_folder_replacements[ML_folder],
+                         'a': df_north_values.columns[0],
+                         'b': df_north_values.columns[1],
+                         'c': df_north_values.columns[2],
+                         'd': df_north_values.columns[3],
+                         'e': df_north_values.columns[4]}
+                to_csv.append(dummy)
+                
+                
                 
                 
                 
@@ -182,11 +215,14 @@ for ML_folder in ML_folders:
                 if y_yes == '_M_':
                     ax.set_ylabel('M, -')
                     ax.set_ylim( (0,6) )
+                    csv_key = 'M'
                 elif y_yes == '_RH_':
                     ax.set_ylabel('RH, %')
                     ax.set_ylim( (50, 100) )
+                    csv_key = 'RH'
                 elif y_yes == '_moverhygr_':
                     ax.set_ylabel('$\Delta m$, kg/m$^2$')
+                    csv_key = 'dm'
                 else:
                     print('other ylabel!')
                 
@@ -199,6 +235,20 @@ for ML_folder in ML_folders:
                 fig.savefig(fname, dpi=dpi_val, bbox_inches='tight')
                 plt.close(fig)
                 
+    
+                dummy = {'Paikkakunta': location,
+                         'Ilmansuunta': 'E',
+                         'Arviointisuure': csv_key,
+                         'n_clusters_max': n_clusters_max,
+                         'Ryhmittely': ML_folder_replacements[ML_folder],
+                         'a': df_south_values.columns[0],
+                         'b': df_south_values.columns[1],
+                         'c': df_south_values.columns[2],
+                         'd': df_south_values.columns[3],
+                         'e': df_south_values.columns[4]}
+                to_csv.append(dummy)
+    
+    
     
                 ## YP
                 rows_rank_YP = [x for x in df.index if '___rank' in x and 'YP' in x]
@@ -225,11 +275,14 @@ for ML_folder in ML_folders:
                 if y_yes == '_M_':
                     ax.set_ylabel('M, -')
                     ax.set_ylim( (0,6) )
+                    csv_key = 'M'
                 elif y_yes == '_RH_':
                     ax.set_ylabel('RH, %')
                     ax.set_ylim( (50, 100) )
+                    csv_key = 'RH'
                 elif y_yes == '_moverhygr_':
                     ax.set_ylabel('$\Delta m$, kg/m$^2$')
+                    csv_key = 'dm'
                 else:
                     print('other ylabel!')
                 
@@ -243,9 +296,36 @@ for ML_folder in ML_folders:
                 plt.close(fig)
                 
     
+                dummy = {'Paikkakunta': location,
+                         'Ilmansuunta': 'YP',
+                         'Arviointisuure': csv_key,
+                         'n_clusters_max': n_clusters_max,
+                         'Ryhmittely': ML_folder_replacements[ML_folder],
+                         'a': df_YP_values.columns[0],
+                         'b': df_YP_values.columns[1],
+                         'c': df_YP_values.columns[2],
+                         'd': df_YP_values.columns[3],
+                         'e': df_YP_values.columns[4]}
+                to_csv.append(dummy)
 
 
 
+# Export candidate design years to excel file
+df_mdy_candidates = pd.DataFrame(to_csv)
+
+df_mdy_candidates = df_mdy_candidates[['n_clusters_max',
+                                      'Paikkakunta',
+                                      'Ilmansuunta',
+                                      'Arviointisuure',
+                                      'Ryhmittely',
+                                      'a', 'b', 'c', 'd', 'e']]
+
+df_mdy_candidates.sort_values(by=['Paikkakunta','Ilmansuunta', 'Arviointisuure'],
+                              inplace=True,
+                              ignore_index=True)
+fname = os.path.join(output_folder,
+                     'mdy_candidates.xlsx')
+df_mdy_candidates.to_excel(fname)
 
 
 

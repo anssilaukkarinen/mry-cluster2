@@ -42,7 +42,17 @@ with open(fname, 'rb') as f:
 data_new = {}
 
 for key in data:
-    if '626' not in key:
+    if '626' in key:
+        pass
+    
+    elif 'UST_' in key:
+        # remove interior data points from UST
+        
+        cols_to_include = [x for x in data[key].columns if 'stud_i' not in x and 'ins_i' not in x]
+        
+        data_new[key] = data[key].loc[:, cols_to_include]
+        
+    else:
         data_new[key] = data[key]
 
 data = data_new
@@ -67,12 +77,12 @@ print(starts_unique)
 
 
 # M
-y_yes_filters = ['M_']
-y_not_filters = ['rank']
+# y_yes_filters = ['M_']
+# y_not_filters = ['rank']
 
 # moverhygr
-# y_yes_filters = ['moverhygr_']
-# y_not_filters = ['rank']
+y_yes_filters = ['moverhygr_']
+y_not_filters = ['rank']
 
 # RH
 # y_yes_filters = ['RH_']
